@@ -19,18 +19,13 @@
     function execDaumPostcode() {
       new daum.Postcode({
         oncomplete: function(data) {
-          var jibunAddress = ""
-
-          if (data.jibunAddress == "") {
-            jibunAddress = data.autoJibunAddress
-          } else if (data.autoJibunAddress == "") {
-            jibunAddress = data.jibunAddress
-          }
 
           var postData = {
-              roadAddress : data.roadAddress,
-              jibunAddress : jibunAddress,
-              zonecode : data.zonecode
+              sido : data.sido,
+              sigungu : data.sigungu,
+              query : data.query,
+              apartment : data.apartment,
+              buildingName: data.buildingName
           };
           window.postMessageToiOS(postData);
         },
