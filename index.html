@@ -19,7 +19,6 @@
     function execDaumPostcode() {
       new daum.Postcode({
         oncomplete: function(data) {
-          oncomplete: function(data) {
             var jibunAddress = data.jibunAddress || data.autoJibunAddress || "";
             var buildingName = data.buildingName || "";
             var apartment = data.apartment || "N";
