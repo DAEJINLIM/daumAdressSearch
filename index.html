@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 
 <html lang="ko">
   <head>
@@ -51,7 +51,6 @@
               zonecode: data.zonecode,
               buildingName: buildingName,
               apartment: apartment,
-              geocoder: geocoder
             };
              window.postMessageToiOS(postData);             
         },
@@ -71,5 +70,89 @@
       element_layer.style.top = (((window.innerHeight || document.documentElement.clientHeight) - height)/2) + 'px';
     }
   </script>
+  </body>
+</html>
+ -->
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <title>주소 찾기</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1.0"/>
+  </head>
+  <body onload="execDaumPostcode()">
+    <div id="layer" style="display:block; position:absolute; overflow:hidden; z-index:1; -webkit-overflow-scrolling:touch;">
+    </div>
+    <script src="https://spi.maps.daum.net/imap/map_js_init/postcode.v2.js"></script>
+    <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=YOUR_KAKAO_API_KEY&libraries=services"></script>
+    <script>
+      window.addEventListener("message", onReceivedPostMessage, false);
+
+      function onReceivedPostMessage(event) {
+        var action = event.data.action;
+        var params = event.data.params;
+        console.log("onReceivedPostMessage " + event);
+      }
+
+      function onReceivedActivityMessageViaJavascriptInterface(json) {
+        var data = JSON.parse(json);
+        var action = data.action;
+        var params = data.params;
+        console.log("onReceivedActivityMessageViaJavascriptInterface " + event);
+      }
+
+      function postMessageToiOS(postData) {
+        window.webkit.messageHandlers.callBackHandler.postMessage(postData);
+      }
+
+      var element_layer = document.getElementById('layer');
+      var geocoder = new kakao.maps.services.Geocoder();
+
+      function execDaumPostcode() {
+        new daum.Postcode({
+          oncomplete: function (data) {
+            var jibunAddress = data.jibunAddress || data.autoJibunAddress || "";
+            var buildingName = data.buildingName || "";
+            var apartment = data.apartment || "N";
+            var roadAddress = data.roadAddress;
+
+            geocoder.addressSearch(roadAddress, function (result, status) {
+              if (status === kakao.maps.services.Status.OK) {
+                var latitude = result[0].y;
+                var longitude = result[0].x;
+
+                var postData = {
+                  roadAddress: roadAddress,
+                  jibunAddress: jibunAddress,
+                  zonecode: data.zonecode,
+                  buildingName: buildingName,
+                  apartment: apartment,
+                  latitude: latitude,
+                  longitude: longitude,
+                };
+
+                console.log(postData);
+                postMessageToiOS(postData);
+              } else {
+                console.error("Geocoding failed: " + status);
+              }
+            });
+          },
+          width: '100%',
+          height: '100%'
+        }).embed(element_layer);
+        element_layer.style.display = 'block';
+        initLayerPosition();
+      }
+
+      function initLayerPosition() {
+        var width = (window.innerWidth || document.documentElement.clientWidth);
+        var height = (window.innerHeight || document.documentElement.clientHeight);
+        element_layer.style.width = width + 'px';
+        element_layer.style.height = height + 'px';
+        element_layer.style.left = (((window.innerWidth || document.documentElement.clientWidth) - width) / 2) + 'px';
+        element_layer.style.top = (((window.innerHeight || document.documentElement.clientHeight) - height) / 2) + 'px';
+      }
+    </script>
   </body>
 </html>
